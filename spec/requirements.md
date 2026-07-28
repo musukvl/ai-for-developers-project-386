@@ -47,3 +47,4 @@ The project is a simple educational project to demonstrate the backend and front
 - No recurring availability schedules
 - Maximum booking horizon: 4 weeks from current date
 - Server restart clears all calendars, availability, and bookings
+- App could be started in tab-based session mode for testing purposes, or in browser-based session mode for production use. In tab-based session mode, the owner and visitor can be simulated in separate browser tabs. In browser-based session mode, the owner and visitor are identified by the current browser session.
