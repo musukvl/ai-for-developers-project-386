@@ -1,17 +1,20 @@
-# Calls calendar app
+# Calls calendar app: Functional Requirements
 
+## Overview
 The project is a simple educational project to demonstrate the backend and frontend application example.
 
-## Functional Requirements
+## Roles
+- Calendar Owner: A user who creates and manages a calendar with available meeting times.
+- Calendar Visitor: A user who views available calendars and books meetings.
 
-### Core Features
+## Core Features
 - Each user can create and publish a calendar with available meeting times
 - Available time slots are displayed as 30-minute intervals
 - Other users can view published calendars and book available time slots
 - Calendar owners can view a list of upcoming booked meetings
 - Prevent double-booking of the same time slot
 
-### Calendar Owner Capabilities
+## Calendar Owner Capabilities
 - Create a personal calendar
 - Define time periods for availability
 - Time periods must be multiples of 30 minutes
@@ -20,13 +23,13 @@ The project is a simple educational project to demonstrate the backend and front
 - Share a public link to their calendar for others to view
 - Cancel booked meetings
 
-### Calendar Visitor Capabilities  
+## Calendar Visitor Capabilities  
 - Browse available public calendars
 - View available time slots in a calendar format
 - View their own bookings in calendar
 - Cancel their bookings
 
-### Constraints & Scope
+## Constraints & Scope
 - No user authentication or login system
 - No personal account dashboards
 - No integration with external calendar services
