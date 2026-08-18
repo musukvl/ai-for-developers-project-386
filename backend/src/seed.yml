@@ -1,0 +1,22 @@
+# Default demo data loaded into in-memory storage on every start.
+# Times are relative to load time: `day` is a whole-day offset from today (UTC)
+# and `start`/`end` are HH:MM on 30-minute boundaries.
+# Reserved demo names only, so the names used in the use cases stay free.
+users:
+  - demo-owner
+  - demo-visitor
+
+calendars:
+  - ownerId: demo-owner
+    availability:
+      - day: +1
+        start: "10:00"
+        end: "12:00"
+      - day: +2
+        start: "14:00"
+        end: "15:00"
+    bookings:
+      - id: seed-booking-1
+        day: +1
+        start: "10:30"
+        visitorName: demo-visitor
