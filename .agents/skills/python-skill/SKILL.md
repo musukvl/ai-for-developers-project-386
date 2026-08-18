@@ -1,22 +1,27 @@
 ---
 name: python-skill
-description: Use this skill when writing, reviewing, or refactoring Python code to ensure adherence to BIP coding standards and industry best practices.
-metadata:
-  version: 1.1.0
+description: Use this skill when writing, reviewing, or refactoring Python code to ensure adherence to best coding standards and industry practices.
 ---
+
 # Python Best Practices Skill
 
 This skill provides comprehensive guidance on Python coding practices.
 
-# Python scripts instructions
+## When To Use
 
-- Use descriptive variable and function names. Don't use 3-letter variable names except for loop counters.
-- Use functions and procedures to organize code into logical sections.
+Use this skill for all interaction with Python code, including reading, writing, modifying, reviewing, refactoring, testing, debugging, and running Python code.
+
+## Python tooling
+
 - Use UV to manage Python dependencies.
 - Use UV capabilities to create isolated environments for different projects.
 - Use UV capabilities to run applications.
 - Generate a `pyproject.toml` file to specify project dependencies and configurations using UV.
-- Python scripts should have all configuration variables at the top of the script. For example, host, port, username, password, topic names, etc.
+
+## Python code generation instructions
+
+- Use descriptive variable and function names. Don't use 3-letter variable names except for loop counters.
+- Use functions and procedures to organize code into logical sections.
 - Use data classes to represent structured data prior Dicts where appropriate.
 - Use logger package functionality instead of print statements for logging.
 - Use loguru for logging in Python.
