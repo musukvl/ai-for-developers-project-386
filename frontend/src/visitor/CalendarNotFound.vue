@@ -1,0 +1,1 @@
+<template><section class="space-y-3"><h1 class="text-2xl font-bold">Calendar not found</h1><p>This calendar does not exist.</p><router-link class="text-indigo-700 underline" to="/">Back to start</router-link></section></template>

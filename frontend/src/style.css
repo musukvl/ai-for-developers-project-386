@@ -1,0 +1,5 @@
+@import "tailwindcss";
+
+body { @apply min-h-screen bg-slate-50 text-slate-900; }
+button { @apply cursor-pointer rounded bg-indigo-600 px-3 py-2 font-medium text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-slate-400; }
+input { @apply rounded border border-slate-300 px-3 py-2; }
