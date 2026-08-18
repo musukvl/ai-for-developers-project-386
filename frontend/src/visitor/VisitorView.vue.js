@@ -26,6 +26,7 @@ catch (reason) {
         error.value = reason instanceof Error ? reason.message : 'Could not book slot.';
 } }
 async function cancel(id) { await api(`/calendars/${props.ownerId}/bookings/${id}`, { method: 'DELETE' }); await load(); }
+function displayBookingDate(value) { return `${value.slice(0, 4)}.${value.slice(5, 7)}.${value.slice(8, 10)} ${value.slice(11, 16)}`; }
 onMounted(load);
 const __VLS_ctx = {
     ...{},
@@ -108,7 +109,7 @@ else {
             /** @type {__VLS_StyleScopedClasses['rounded']} */ ;
             /** @type {__VLS_StyleScopedClasses['bg-white']} */ ;
             /** @type {__VLS_StyleScopedClasses['p-3']} */ ;
-            (booking.start);
+            (__VLS_ctx.displayBookingDate(booking.start));
             __VLS_asFunctionalElement1(__VLS_intrinsics.button, __VLS_intrinsics.button)({
                 ...{ onClick: (...[$event]) => {
                         if (!!(__VLS_ctx.notFound))
@@ -117,7 +118,7 @@ else {
                             throw 0;
                         return (__VLS_ctx.cancel(booking.id));
                         // @ts-ignore
-                        [notFound, ownerId, error, error, calendar, calendar, calendar, calendar, book, cancel,];
+                        [notFound, ownerId, error, error, calendar, calendar, calendar, calendar, book, displayBookingDate, cancel,];
                     } },
             });
             // @ts-ignore
