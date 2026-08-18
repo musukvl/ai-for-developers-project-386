@@ -9,6 +9,7 @@
 - User names are not authentication credentials. They provide lightweight identification for this educational, public application.
 - User names are normalized before use: trimmed and lowercased. A normalized name must be 3 to 64 characters long and match `[a-z0-9-]+`. Every endpoint except `POST /api/users` rejects a missing or non-conforming `X-User-Name` with `400 validation_error`.
 - A calendar's `ownerId` is always the normalized user name of its owner, so a user has at most one calendar and it always lives at `/cal/{name}`.
+- The role is decided in the frontend by comparing the entered name with the `{ownerId}` in the URL. There is no role or session endpoint. Whether the calendar exists is learned from the owner or visitor `GET` call the chosen module makes.
 - A slot is exactly 30 minutes. Slot start times must fall on a 30-minute boundary.
 - All error responses have the following shape:
 
@@ -122,22 +123,6 @@ Response: `200 OK`
 
 `name` is the normalized name the SPA must store and send back as `X-User-Name`. `isNew` is `true` when the name was not yet known and has just been registered. `hasCalendar` is `true` when a calendar named after this user exists, letting the start page link straight to `/cal/{name}` instead of offering the create form. Returns `400 validation_error` when the normalized name does not satisfy the name rules.
 
-## Session Role
-
-`GET /api/calendars/{ownerId}/session`
-
-Returns which SPA module the current user should mount for this calendar. This endpoint is a routing probe only. It does not return slots or bookings.
-
-Response: `200 OK`
-
-```json
-{
-  "role": "owner"
-}
-```
-
-`role` is `owner` when the normalized `X-User-Name` equals `{ownerId}`, and `visitor` otherwise. Returns `404 not_found` if the public calendar does not exist.
-
 ## Owner API
 
 ### Create Calendar
@@ -233,7 +218,7 @@ Returns `400 name_mismatch` when the current user name is not `{ownerId}`, and `
 
 `GET /api/calendars/{ownerId}`
 
-Public. Returns the visitor calendar shape for any user. Returns `404 not_found` if the public calendar does not exist.
+Public in the sense that no ownership check is applied: any user may read any calendar. The `X-User-Name` header is still required, because `myBookings` is resolved from it. Returns `404 not_found` if the public calendar does not exist.
 
 ### Create Booking
 

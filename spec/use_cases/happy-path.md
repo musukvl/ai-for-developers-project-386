@@ -2,7 +2,7 @@
 
 ## Preconditions
 
-- The application is running and the owner name chosen below is not already in use.
+- The application is running and the owner name chosen below is not already in use. Seed data only declares reserved demo names, so `alex` and `sam` are free on a freshly started app.
 - All dates and times are expressed in UTC.
 
 ## Enter Name
@@ -15,7 +15,7 @@
 
 ## Create Calendar
 
-1. The user has no calendar yet, so the root page shows the create-calendar form.
+1. The user has no calendar yet, so the root page mounts the owner module, which shows the create-calendar form.
 2. The user confirms creation; the calendar is named after the user, `alex`.
 3. The application creates the calendar at `/cal/alex` and makes it public.
 4. The application redirects the user to `/cal/alex`.

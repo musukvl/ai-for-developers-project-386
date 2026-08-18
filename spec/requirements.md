@@ -23,6 +23,7 @@ The project is a simple educational project to demonstrate the backend and front
 - Calendar owners can view a list of upcoming booked meetings
 - Prevent double-booking of the same time slot
 - One calendar per owner; a second create attempt by the same user is rejected
+- Opening `/cal/{name}` for a calendar that does not exist offers creation when `{name}` is the entered name, and otherwise shows a "calendar not found" page
 - Availability can be published up to 4 weeks (rolling) into the future
 - A slot is either free or booked and always stays in the calendar; a booked slot cannot be removed while the booking exists, and removing neighbouring slots never affects it
 - To free a booked time the owner cancels the booking first and then removes the slot
@@ -56,5 +57,6 @@ The project is a simple educational project to demonstrate the backend and front
 - No email or in-app notifications
 - No recurring availability schedules
 - Maximum booking horizon: 4 weeks from current date
-- Server restart clears all users, calendars, availability, and bookings
+- Server restart clears all users, calendars, availability, and bookings; nothing survives a restart except the declared seed data, which is loaded again on every start
+- Seeded demo data uses reserved names (`demo-owner`, `demo-visitor`), so names used in the use cases are free on a freshly started app
 - The entered name is remembered per browser tab, so owner and visitor can be simulated by entering different names in separate tabs. Opening a new tab asks for the name again.
