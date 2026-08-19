@@ -1,1 +1,0 @@
-"""Calls Calendar application package."""

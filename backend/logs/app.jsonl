@@ -1,0 +1,13 @@
+{"ts":"2026-08-18T21:33:17.308Z","level":"INFO","event":"seed.loaded","seed_file":"/home/musuk/dev/ai-for-developers-project-386/backend/src/seed.yml","users":2,"calendars":1}
+{"ts":"2026-08-18T21:33:17.325Z","level":"INFO","request_id":"43b947","event":"user.registered","user":"alex","is_new":true}
+{"ts":"2026-08-18T21:33:17.325Z","level":"INFO","request_id":"43b947","event":"request.end","method":"POST","path":"/api/users","user":null,"status":200,"duration_ms":0.37}
+{"ts":"2026-08-18T21:33:17.326Z","level":"INFO","request_id":"5c36dc","event":"calendar.created","owner_id":"alex","user":"alex"}
+{"ts":"2026-08-18T21:33:17.326Z","level":"INFO","request_id":"5c36dc","event":"request.end","method":"POST","path":"/api/calendars","user":"alex","status":201,"duration_ms":0.24}
+{"ts":"2026-08-18T21:33:17.326Z","level":"INFO","request_id":"6aa991","event":"request.end","method":"GET","path":"/api/calendars/alex/owner","user":"alex","status":200,"duration_ms":0.06}
+{"ts":"2026-08-18T21:34:22.510Z","level":"INFO","event":"seed.loaded","seed_file":"/home/musuk/dev/ai-for-developers-project-386/backend/src/seed.yml","users":2,"calendars":1}
+{"ts":"2026-08-18T21:34:22.518Z","level":"INFO","request_id":"26715b","event":"user.registered","user":"alex","is_new":true}
+{"ts":"2026-08-18T21:34:22.518Z","level":"INFO","request_id":"26715b","event":"request.end","method":"POST","path":"/api/users","user":null,"status":200,"duration_ms":0.36}
+{"ts":"2026-08-18T21:34:22.519Z","level":"INFO","request_id":"581ab8","event":"calendar.created","owner_id":"alex","user":"alex"}
+{"ts":"2026-08-18T21:34:22.519Z","level":"INFO","request_id":"581ab8","event":"request.end","method":"POST","path":"/api/calendars","user":"alex","status":201,"duration_ms":0.25}
+{"ts":"2026-08-18T21:34:22.520Z","level":"INFO","request_id":"57ee84","event":"availability.added","owner_id":"alex","slot_count":2}
+{"ts":"2026-08-18T21:34:22.520Z","level":"INFO","request_id":"57ee84","event":"request.end","method":"POST","path":"/api/calendars/alex/availability","user":"alex","status":200,"duration_ms":0.26}
