@@ -28,9 +28,8 @@ COPY --from=frontend-build /app/frontend/dist ./static
 ENV STATIC_DIR=/app/backend/static
 ENV PORT=5000
 ENV LOG_LEVEL=INFO
-ENV LOG_FILE=/app/backend/logs/app.jsonl
 
-EXPOSE 5000
+EXPOSE ${PORT}
 
 # Run the already-synced venv's interpreter directly rather than `uv run`,
 # which re-syncs (and would fetch the dev dependency group) on every start.

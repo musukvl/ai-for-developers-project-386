@@ -63,7 +63,7 @@ def _resolve_settings(overrides: dict | None) -> dict:
         "SEED_FILE": os.environ.get("SEED_FILE", "src/seed.yml"),
         "PORT": int(os.environ.get("PORT", "5000")),
         "LOG_LEVEL": os.environ.get("LOG_LEVEL", "INFO"),
-        "LOG_FILE": os.environ.get("LOG_FILE", "logs/app.jsonl"),
+        "LOG_FILE": os.environ.get("LOG_FILE"),
         "STATIC_DIR": os.environ.get("STATIC_DIR"),
     }
     if overrides:

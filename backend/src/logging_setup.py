@@ -1,4 +1,4 @@
-"""Structured logging: one flat JSON object per line, to stdout and to LOG_FILE.
+"""Structured logging: one flat JSON object per line, optionally persisted to LOG_FILE.
 
 Configured with a custom serializer plus `logger.patch`, not `serialize=True`,
 because loguru's default serialization wraps every record in a nested
@@ -53,12 +53,12 @@ def _make_file_sink(path: str):
     return sink
 
 
-def configure_logging(log_level: str, log_file: str) -> None:
-    """Reset loguru sinks and attach the flat JSON Lines sinks for stdout and `log_file`."""
-    directory = os.path.dirname(log_file)
-    if directory:
-        os.makedirs(directory, exist_ok=True)
-
+def configure_logging(log_level: str, log_file: str | None) -> None:
+    """Reset loguru sinks and attach stdout plus an optional JSON Lines file sink."""
     _base_logger.remove()
     _base_logger.add(_stdout_sink, level=log_level)
-    _base_logger.add(_make_file_sink(log_file), level=log_level)
+    if log_file:
+        directory = os.path.dirname(log_file)
+        if directory:
+            os.makedirs(directory, exist_ok=True)
+        _base_logger.add(_make_file_sink(log_file), level=log_level)
