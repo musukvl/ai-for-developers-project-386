@@ -34,6 +34,16 @@ Both roles use the same monthly calendar layout:
 - If the selected date has no available slots, show a clear empty-state message.
 - If a calendar contains no available slots, still render the owner calendar picker; the visitor sees the appropriate no-availability state.
 
+## Calendar directory control
+
+Both the owner and visitor calendar pages show a control listing every existing calendar, so users can jump between calendars without knowing owner names in advance:
+
+- Label the control **Other calendars** and render it as a list of links, one per existing calendar owner, each pointing to `/cal/{ownerId}`.
+- Sort the list alphabetically by owner name.
+- Exclude the calendar currently being viewed from the list.
+- Show a clear empty-state message when no other calendars exist.
+- Give the control its own loading and error feedback, independent of the calendar picker above it, so a failure to load the directory never blocks viewing or managing the current calendar.
+
 ## Name entry page
 
 - Show the application title, a concise explanation, a required name input, and a **Continue** action.
@@ -54,6 +64,7 @@ For an entered name:
 The owner page is shown only when the entered name matches `ownerId`.
 
 - Display the calendar owner name and the public share path `/cal/{ownerId}`.
+- Show the **Other calendars** directory control described above.
 - Use the shared monthly calendar picker for availability management.
 - Allow the owner to select any non-past day in the calendar.
 - Below the calendar, show an **Add a time frame** form for the currently selected date.
@@ -75,6 +86,7 @@ The owner page is shown only when the entered name matches `ownerId`.
 The visitor page is shown when the entered name differs from `ownerId`.
 
 - Display the owner name and use the shared monthly calendar picker.
+- Show the **Other calendars** directory control described above.
 - Only dates with open slots may be selected.
 - In the Available times panel, label the slot action **Book**.
 - Selecting **Book** creates a booking for the currently entered name without asking for a second name.
