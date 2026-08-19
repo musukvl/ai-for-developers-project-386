@@ -36,3 +36,8 @@ def serialize_owner_calendar(
         "availableSlots": [serialize_slot(slot) for slot in available_slots],
         "bookings": [serialize_booking(booking) for booking in bookings],
     }
+
+
+def serialize_calendar_directory(owner_ids: list[str]) -> dict:
+    """Serialize the public directory of existing calendar owners."""
+    return {"calendars": [{"ownerId": owner_id} for owner_id in owner_ids]}

@@ -12,6 +12,7 @@ from werkzeug.exceptions import HTTPException
 
 from src.errors import ApiError, not_found
 from src.logging_setup import configure_logging, logger
+from src.routes_calendars import calendars_bp
 from src.routes_health import health_bp
 from src.routes_owner import owner_bp
 from src.routes_users import users_bp
@@ -46,6 +47,7 @@ def create_app(config: dict | None = None) -> Flask:
 
     app.register_blueprint(health_bp)
     app.register_blueprint(users_bp)
+    app.register_blueprint(calendars_bp)
     app.register_blueprint(owner_bp)
     app.register_blueprint(visitor_bp)
 

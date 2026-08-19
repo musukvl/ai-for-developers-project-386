@@ -20,10 +20,13 @@ test("enter name, create calendar, publish availability, and book a meeting", as
   await ownerPage.getByRole("button", { name: "Continue" }).click();
 
   await expect(ownerPage.getByRole("heading", { name: "Create your calendar" })).toBeVisible();
+  await expect(ownerPage.getByRole("heading", { name: "Other calendars" })).toBeVisible();
+  await expect(ownerPage.getByText("No other calendars are available.")).toBeVisible();
   await ownerPage.getByRole("button", { name: "Create calendar" }).click();
 
   await expect(ownerPage).toHaveURL(/\/cal\/alex$/);
   await expect(ownerPage.getByRole("heading", { name: "alex's calendar" })).toBeVisible();
+  await expect(ownerPage.getByText("No other calendars are available.")).toBeVisible();
 
   await ownerPage.getByRole("button", { name: new RegExp(`^${dateKey}`) }).click();
   await ownerPage.getByLabel("Start time").selectOption("10:00");

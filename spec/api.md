@@ -140,6 +140,31 @@ Response: `200 OK`
 
 `name` is the normalized name the SPA must store and send back as `X-User-Name`. `isNew` is `true` when the name was not yet known and has just been registered. `hasCalendar` is `true` when a calendar named after this user exists, letting the start page link straight to `/cal/{name}` instead of offering the create form. Returns `400 validation_error` when the normalized name does not satisfy the name rules.
 
+## Calendar Directory API
+
+### List Calendars
+
+`GET /api/calendars`
+
+Returns every existing public calendar, sorted alphabetically by owner name. The
+`X-User-Name` header is required, but any valid user can read the directory.
+An empty directory returns `200 OK` with an empty `calendars` array.
+
+Response: `200 OK`
+
+```json
+{
+  "calendars": [
+    {
+      "ownerId": "alex"
+    },
+    {
+      "ownerId": "blake"
+    }
+  ]
+}
+```
+
 ## Owner API
 
 ### Create Calendar

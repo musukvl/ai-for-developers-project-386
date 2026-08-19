@@ -30,6 +30,12 @@ const scenarios: Scenario[] = [
     backendPort: 5303,
     frontendPort: 5403,
   },
+  {
+    name: "calendar-directory",
+    seedFile: "calendar-directory.yml",
+    backendPort: 5304,
+    frontendPort: 5404,
+  },
 ];
 
 const reuseExistingServer = !process.env.CI;

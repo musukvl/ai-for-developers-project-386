@@ -55,6 +55,8 @@ Both the owner and visitor calendar pages show a control listing every existing 
 For an entered name:
 
 - Show the owner create-calendar flow when the user has no calendar.
+- Show the **Other calendars** directory control alongside the create-calendar flow,
+  including when the entered user does not yet own a calendar.
 - The create form has a single clear action to create the calendar named after the user.
 - After successful creation, navigate to `/cal/{normalizedName}`.
 - When the user already owns a calendar, provide a direct route to that calendar instead of offering a second creation action.

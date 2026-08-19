@@ -1,0 +1,16 @@
+users:
+  - alex
+  - blake
+  - visitor
+  - zoe
+
+calendars:
+  - ownerId: zoe
+    availability: []
+    bookings: []
+  - ownerId: alex
+    availability: []
+    bookings: []
+  - ownerId: blake
+    availability: []
+    bookings: []

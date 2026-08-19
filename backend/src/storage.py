@@ -72,6 +72,11 @@ class Storage:
         with self._lock:
             return owner_id in self._calendars
 
+    def list_calendar_owner_ids(self) -> list[str]:
+        """Return all calendar owner IDs in ascending alphabetical order."""
+        with self._lock:
+            return sorted(self._calendars)
+
     def create_calendar(self, owner_id: str) -> None:
         """Create an empty public calendar for `owner_id`."""
         with self._lock:

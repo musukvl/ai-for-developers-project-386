@@ -7,6 +7,7 @@
 import { computed } from "vue";
 
 import OwnerCalendarPage from "../owner/OwnerCalendarPage.vue";
+import CalendarDirectory from "../shared/CalendarDirectory.vue";
 import VisitorCalendarPage from "../visitor/VisitorCalendarPage.vue";
 import { useUserName } from "./useUserName";
 
@@ -18,6 +19,9 @@ const isOwner = computed(() => userName.value === props.ownerId);
 </script>
 
 <template>
-  <OwnerCalendarPage v-if="isOwner" :owner-id="ownerId" />
-  <VisitorCalendarPage v-else :owner-id="ownerId" />
+  <div class="space-y-6">
+    <CalendarDirectory :key="ownerId" :current-owner-id="ownerId" />
+    <OwnerCalendarPage v-if="isOwner" :key="`owner-${ownerId}`" :owner-id="ownerId" />
+    <VisitorCalendarPage v-else :key="`visitor-${ownerId}`" :owner-id="ownerId" />
+  </div>
 </template>

@@ -34,3 +34,11 @@ export interface CreateCalendarResult {
   ownerId: string;
   calendarUrl: string;
 }
+
+export interface CalendarDirectoryEntry {
+  ownerId: string;
+}
+
+export interface CalendarDirectory {
+  calendars: CalendarDirectoryEntry[];
+}

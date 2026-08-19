@@ -7,6 +7,7 @@
 import { onMounted } from "vue";
 
 import CreateCalendarForm from "../owner/CreateCalendarForm.vue";
+import CalendarDirectory from "../shared/CalendarDirectory.vue";
 import { useUserName } from "./useUserName";
 
 const { userName, refreshStatus } = useUserName();
@@ -17,5 +18,8 @@ onMounted(() => {
 </script>
 
 <template>
-  <CreateCalendarForm :owner-id="userName" />
+  <div class="space-y-6">
+    <CreateCalendarForm :owner-id="userName" />
+    <CalendarDirectory :current-owner-id="userName" />
+  </div>
 </template>
