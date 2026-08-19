@@ -7,6 +7,8 @@ A small scheduling app: an owner publishes 30-minute availability slots on their
 calendar, and visitors book a slot with a name and no account. See [spec/](spec/)
 for the full requirements, API contract, and UI notes.
 
+Live app: https://ai-for-developers-project-386-wwcr.onrender.com/
+
 - **Backend**: Python + Flask, in-memory storage, seeded from YAML on startup.
 - **Frontend**: Vue 3 (Composition API) + TypeScript + Tailwind CSS v4, built with Vite.
 - **Tests**: `pytest` (unit + integration) for the backend, Playwright for end-to-end.
