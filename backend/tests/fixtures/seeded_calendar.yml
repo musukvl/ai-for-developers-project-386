@@ -1,0 +1,17 @@
+# Pre-existing calendar for "blake" with one free slot and one booking, so tests
+# can exercise reads and mutations without first driving state through the API.
+users:
+  - blake
+  - casey
+
+calendars:
+  - ownerId: blake
+    availability:
+      - day: +1
+        start: "09:00"
+        end: "10:00"
+    bookings:
+      - id: seeded-booking-1
+        day: +1
+        start: "09:00"
+        visitorName: casey

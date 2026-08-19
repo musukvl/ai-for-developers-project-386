@@ -1,0 +1,17 @@
+# Pre-existing booking so the owner-cancel spec can cancel it directly,
+# without first driving availability and booking through the UI.
+users:
+  - morgan
+  - riley
+
+calendars:
+  - ownerId: morgan
+    availability:
+      - day: +2
+        start: "13:00"
+        end: "14:00"
+    bookings:
+      - id: e2e-seeded-booking
+        day: +2
+        start: "13:00"
+        visitorName: riley
