@@ -68,14 +68,17 @@ The guest booking calendar uses a monthly layout. Slots are system-generated for
   - event type title
   - guest name given at booking time
   - **Cancel** action
-- The owner calendar uses the same Monday-first UTC month grid as the guest picker. Days with upcoming bookings show the meeting count. Selecting a date shows that day's meetings (`HH:mm–HH:mm`, event type, guest name) with **Cancel**. Dates without upcoming bookings are not selectable.
+- The owner calendar uses the same Monday-first UTC month grid as the guest picker.
+  - Each date tile with upcoming meetings lists those meetings on the tile itself: start time (`HH:mm`) and guest name, one line per meeting. If more than three meetings fall on one date, show the first three and a `+N more` remainder.
+  - Days with upcoming bookings are selectable. Dates without upcoming bookings are not selectable.
+  - Selecting a date shows that day's meetings in a side panel (`HH:mm–HH:mm`, event type, guest name) with **Cancel**.
 - Cancelling a booking refreshes the calendar and the list. The freed interval appears again as a generated slot on the guest calendar.
 - Show a public link guests can open (the catalog at `/`).
 
 ## Visual and interaction requirements
 
 - Use clear visual distinction for available, selected, disabled/past, and outside-month calendar dates.
-- Use accessible button labels for month navigation and calendar days, including available-slot counts when applicable.
+- Use accessible button labels for month navigation and calendar days, including available-slot counts on the guest picker and booked-meeting summaries (start time and guest name) on the owner calendar.
 - Use semantic labels for slot times, the guest-name field, and booking actions.
 - Disable controls when an action cannot be performed, rather than letting users submit an invalid date or slot selection.
 - Ensure action buttons clearly state the outcome: **Book**, **Confirm booking**, **Create event type**, and **Cancel**.
