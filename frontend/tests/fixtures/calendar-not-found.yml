@@ -1,4 +1,0 @@
-# No pre-existing calendars: any /cal/:ownerId other than the entered name
-# should render the "Calendar not found" page.
-users: []
-calendars: []

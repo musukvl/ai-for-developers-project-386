@@ -1,4 +1,0 @@
-# No pre-existing state: the happy-path spec drives everything through the UI,
-# from entering a name through booking a meeting.
-users: []
-calendars: []

@@ -1,62 +1,68 @@
 # Calls calendar app: Functional Requirements
 
 ## Overview
-The project is a simple educational project to demonstrate the backend and frontend application example.
+The project is a simple educational project to demonstrate the backend and frontend application example. This document describes external behaviour only: supported scenarios, data that is shown or stored, and booking constraints. Stack, internals, and project structure are chosen separately.
 
 ## Roles
-- User: Anyone using the app, identified by the name entered on the start page. The same name always means the same user.
-- Calendar Owner: A user whose name matches the calendar name/ID in the URL. Creates and manages that calendar's available meeting times.
-- Calendar Visitor: A user whose name does not match the calendar name/ID in the URL. Views available slots and books meetings.
+- Calendar Owner: A person who has a calendar named after the name they entered on **Create calendar**. The owner creates event types for that calendar and views its upcoming meetings. A seeded owner profile exists so the app has a public calendar before anyone creates one.
+- Guest: Anyone using a public calendar who is not in that calendar's owner UI. The guest views event types, picks a type, and books a free slot. The guest does not create an account and does not log in to browse or book.
+
+There is no registration and no authentication. There are no passwords.
 
 ## User Identity
-- The user enters a name on the start page before viewing or using any calendar
-- The name is trimmed and normalized to lowercase; the normalized name is the user ID used in storage, in the API, and in URLs
-- Entering an existing name logs the user in as that user; entering a new name registers it. There are no passwords and no verification step
-- The application remembers the entered name so it does not have to be retyped on every page
-- The role is derived per calendar: entering `sam` and opening `/cal/sam` shows the owner view, while entering `sam` and opening `/cal/vasya` shows the visitor view
+- Do not ask for a name on a start page, and do not remember a name per tab. That would be login. Guests browse and book without signing in.
+- **Create calendar** is a guest action. It prompts for a name. That name becomes the calendar name/ID, and the guest becomes the owner of that calendar. There is no password.
+- One calendar per name. A second create with the same name is rejected.
+- Opening the owner UI for a calendar uses that calendar's name and does not require a password. The seeded owner calendar is available the same way.
+- Do ask for the guest's name when they confirm a slot. That booking name is independent of the calendar-owner name. It is stored on that booking only so the owner's upcoming-meetings list can show who is coming. It is not an account, it does not log the guest in, and using the same name later does not restore a session.
+
+## Event Types
+- Each calendar has event types that a guest picks before booking. An event type has an id, a title, a description, and a duration in minutes.
+- When a calendar is created it already has two default event types: `15m call` (15 minutes) and `30m call` (30 minutes). The seeded calendar has the same defaults.
+- The calendar owner can create additional custom event types on their calendar and set each type's id, title, description, and duration in minutes.
+- The owner's upcoming-meetings list shows bookings of every event type on that calendar together in one list.
+- Occupancy is by clock time on that calendar, not by event type: two bookings on the same calendar cannot overlap, even when they are different event types. Bookings on different calendars do not block each other.
+
+## Slot generation
+- The owner does not set, edit, or remove available slots. The backend generates them.
+- Available slots are formed for 14 UTC calendar days starting from the current UTC date: today through today+13.
+- For the selected event type, each of those days is filled with consecutive slots of that type's duration in minutes, starting at `00:00` UTC. A slot must start and end on the same UTC date.
+- A slot whose start has already passed is not offered.
+- A guest can book only a free generated slot from that window.
+- A booking occupies its clock interval for every event type on that calendar: any generated slot that overlaps a booking is not free.
+- Cancelling a booking frees that interval. The slot is offered again because the grid is regenerated, not because stored availability was restored.
 
 ## Core Features
-- Each user can create a calendar with available meeting times, and the calendar becomes public immediately after creation
-- A calendar's name/ID is always the owner's user name
-- Available time slots are displayed as fixed 30-minute intervals
-- Other users can view published calendars and book available time slots
-- Calendar owners can view a list of upcoming booked meetings
-- Prevent double-booking of the same time slot
-- One calendar per owner; a second create attempt by the same user is rejected
-- Opening `/cal/{name}` for a calendar that does not exist offers creation when `{name}` is the entered name, and otherwise shows a "calendar not found" page
-- Availability can be published up to 4 weeks (rolling) into the future
-- A slot is either free or booked and always stays in the calendar; a booked slot cannot be removed while the booking exists, and removing neighbouring slots never affects it
-- To free a booked time the owner cancels the booking first and then removes the slot
-- Cancelling a booking returns its slot to the available list, whether the owner or the visitor cancelled it
-- No notifications — users refresh the page to see changes
+- There is a seeded public calendar. Guests can also create their own calendar and become its owner.
+- Guests open a public calendar, view its event types, choose a type, and book a free slot of that type inside the 14-day window.
+- The owner of a calendar views a list of upcoming booked meetings across that calendar's event types.
+- Prevent double-booking of the same time on the same calendar, including across different event types.
+- Cancelling a booking returns that interval to the generated free-slot list on that calendar.
+- No notifications — users refresh the page to see changes.
 
 ## Calendar Owner Capabilities
-- Create a personal calendar named after the owner's user name
-- Define specific date/time ranges for availability (one-off blocks, not recurring)
-- Time periods must be multiples of 30 minutes
-- View all available time slots for their calendar
-- View list of booked meetings with visitor name information
-- Share a public link to their calendar for others to view
-- Cancel booked meetings
-- Access own calendar at `/cal/{name}` while entered under that name
+- Become owner by using **Create calendar** and entering a name, with no sign-in and no password.
+- Create custom event types (id, title, description, duration in minutes) on their calendar in addition to the default `15m call` and `30m call`.
+- View a page of upcoming meetings that lists bookings of every event type on their calendar in one list, showing the guest name given at booking time and the event type.
+- Share a public link to their calendar for guests to view.
+- Cancel booked meetings on their calendar.
 
-## Calendar Visitor Capabilities  
-- Open a public calendar directly by URL/ID after entering a name
-- View available time slots in a calendar format
-- Book a 30-minute time slot; the booking is tied to the visitor's entered name
-- View their own bookings in calendar while entered under the same name
-- Cancel their bookings
+## Guest Capabilities
+- Open a public calendar with no account and no login.
+- Use **Create calendar**, which prompts for a name; on success they become owner of a new calendar with that name.
+- View a page of that calendar's event types showing title, description, and duration.
+- Select an event type, open the calendar, and pick a free slot in the next 14 days.
+- Confirm a booking on the selected slot by entering a guest name. The booking stores the chosen event type and that name. That guest name is not a login and is not remembered.
 
 ## Constraints & Scope
-- No passwords and no authentication: entering a name is enough to act as that user
-- No personal account dashboards
-- No integration with external calendar services
-- No persistent storage of users, calendars or bookings (in-memory storage only)
-- All calendars are publicly accessible by URL/ID
-- Single timezone support: UTC only
-- No email or in-app notifications
-- No recurring availability schedules
-- Maximum booking horizon: 4 weeks from current date
-- Server restart clears all users, calendars, availability, and bookings; nothing survives a restart except the declared seed data, which is loaded again on every start
-- Seeded demo data uses reserved names (`demo-owner`, `demo-visitor`), so names used in the use cases are free on a freshly started app
-- The entered name is remembered per browser tab, so owner and visitor can be simulated by entering different names in separate tabs. Opening a new tab asks for the name again.
+- No registration, no passwords, and no authentication.
+- No personal account dashboards, no guest sessions, and no start-page name remembered per tab.
+- No integration with external calendar services.
+- No persistent storage of calendars, event types, or bookings (in-memory storage only). Slots are not stored; they are generated on each request.
+- Each calendar is publicly accessible by URL.
+- Single timezone support: UTC only.
+- No email or in-app notifications.
+- No owner-published availability and no recurring availability schedules.
+- Maximum booking horizon: 14 days from the current date.
+- Server restart clears calendars, event types, and bookings; nothing survives a restart except the declared seed data, which is loaded again on every start.
+- Seeded demo data recreates a predefined owner calendar, the default event types (`15m call`, `30m call`), and any declared demo bookings.
