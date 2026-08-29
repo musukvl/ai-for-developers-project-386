@@ -15,8 +15,10 @@ test.afterAll(async () => {
 test("owner cancels a booking and the slot can be booked again", async ({ page }) => {
   await page.goto(`${app.url}/owner`);
   await expect(page.getByRole("heading", { name: "Booked meetings" })).toBeVisible();
-  await expect(page.getByText("Sam")).toBeVisible();
-  await page.getByRole("button", { name: "Cancel" }).click();
+  await expect(page.getByRole("heading", { name: "Meetings on this day" })).toBeVisible();
+  await page.getByRole("button", { name: new RegExp(`${utcTomorrowKey()}, 1 booked meeting`) }).click();
+  await expect(page.getByRole("button", { name: /Cancel meeting with Sam/ })).toHaveCount(2);
+  await page.getByRole("button", { name: /Cancel meeting with Sam/ }).first().click();
   await expect(page.getByText("No upcoming meetings.")).toBeVisible();
 
   await page.goto(app.url);

@@ -63,12 +63,13 @@ The guest booking calendar uses a monthly layout. Slots are system-generated for
   - Deleting an event type prompts for confirmation.
   - If deletion fails with `future_bookings_exist`, show a message: "Cannot delete — cancel all upcoming bookings for this event type first."
   - After successful deletion, refresh the event types list.
-- Show a **Booked meetings** section listing upcoming bookings of every event type in one list. Each item displays:
+- Show a **Booked meetings** section with both a monthly calendar and the full upcoming list. Each list item displays:
   - `YYYY.MM.DD HH:mm`
   - event type title
   - guest name given at booking time
   - **Cancel** action
-- Cancelling a booking refreshes the list. The freed interval appears again as a generated slot on the guest calendar.
+- The owner calendar uses the same Monday-first UTC month grid as the guest picker. Days with upcoming bookings show the meeting count. Selecting a date shows that day's meetings (`HH:mm–HH:mm`, event type, guest name) with **Cancel**. Dates without upcoming bookings are not selectable.
+- Cancelling a booking refreshes the calendar and the list. The freed interval appears again as a generated slot on the guest calendar.
 - Show a public link guests can open (the catalog at `/`).
 
 ## Visual and interaction requirements

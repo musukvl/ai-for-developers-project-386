@@ -4,9 +4,10 @@ import { RouterLink } from "vue-router";
 
 import { ApiError } from "../api/client";
 import type { Booking, EventType } from "../api/types";
-import { formatBookingDateTime } from "../shared/dateTime";
+import { formatBookingDateTime, formatTime } from "../shared/dateTime";
 import { cancelBooking, deleteEventType, listEventTypes, listOwnerBookings } from "./api";
 import CreateEventTypeForm from "./CreateEventTypeForm.vue";
+import OwnerMeetingsCalendar from "./OwnerMeetingsCalendar.vue";
 
 const loading = ref(true);
 const errorMessage = ref<string | null>(null);
@@ -16,8 +17,10 @@ const pendingDeleteId = ref<string | null>(null);
 
 const publicUrl = `${window.location.origin}/`;
 
-async function load(): Promise<void> {
-  loading.value = true;
+async function load(options: { silent?: boolean } = {}): Promise<void> {
+  if (!options.silent) {
+    loading.value = true;
+  }
   errorMessage.value = null;
   try {
     const [catalog, upcoming] = await Promise.all([listEventTypes(), listOwnerBookings()]);
@@ -49,7 +52,7 @@ async function onCancelBooking(bookingId: string): Promise<void> {
   errorMessage.value = null;
   try {
     await cancelBooking(bookingId);
-    await load();
+    await load({ silent: true });
   } catch (error) {
     errorMessage.value = error instanceof ApiError ? error.message : "Could not cancel booking.";
   }
@@ -114,25 +117,29 @@ onMounted(load);
     <section>
       <h2 class="text-lg font-semibold">Booked meetings</h2>
       <p v-if="!loading && bookings.length === 0" class="mt-2 text-slate-500">No upcoming meetings.</p>
-      <ul v-else class="mt-3 space-y-3">
-        <li
-          v-for="booking in bookings"
-          :key="booking.id"
-          class="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white p-4"
-        >
-          <div>
-            <p class="font-medium">{{ formatBookingDateTime(booking.start) }}</p>
-            <p class="text-sm text-slate-600">{{ booking.eventTypeTitle }} · {{ booking.guestName }}</p>
-          </div>
-          <button
-            type="button"
-            class="text-sm font-semibold text-red-700"
-            @click="onCancelBooking(booking.id)"
+      <div v-else-if="!loading" class="mt-4 space-y-6">
+        <OwnerMeetingsCalendar :bookings="bookings" @cancel="onCancelBooking" />
+        <ul class="space-y-3">
+          <li
+            v-for="booking in bookings"
+            :key="booking.id"
+            class="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white p-4"
           >
-            Cancel
-          </button>
-        </li>
-      </ul>
+            <div>
+              <p class="font-medium">{{ formatBookingDateTime(booking.start) }}</p>
+              <p class="text-sm text-slate-600">{{ booking.eventTypeTitle }} · {{ booking.guestName }}</p>
+            </div>
+            <button
+              type="button"
+              class="text-sm font-semibold text-red-700"
+              :aria-label="`Cancel meeting with ${booking.guestName} at ${formatTime(booking.start)}`"
+              @click="onCancelBooking(booking.id)"
+            >
+              Cancel
+            </button>
+          </li>
+        </ul>
+      </div>
     </section>
   </section>
 </template>
