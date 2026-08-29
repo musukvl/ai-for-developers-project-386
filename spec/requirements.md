@@ -1,68 +1,57 @@
-# Calls calendar app: Functional Requirements
+# Calls Calendar App: Functional Requirements
 
 ## Overview
-The project is a simple educational project to demonstrate the backend and frontend application example. This document describes external behaviour only: supported scenarios, data that is shown or stored, and booking constraints. Stack, internals, and project structure are chosen separately.
+
+A simple educational project demonstrating a backend and frontend application. This document describes external behaviour only: supported scenarios, data shown or stored, and booking constraints. Stack, internals, and project structure are in `implementation.md`.
 
 ## Roles
-- Calendar Owner: A single predefined profile. The owner creates event types and views upcoming meetings. This profile is used by default in the admin part of the application.
-- Guest: Anyone browsing the public calendar. The guest views event types, picks a type, and books a free slot. The guest does not create an account and does not log in to browse or book.
 
-There is no registration and no authentication. There are no passwords.
+- **Calendar Owner**: A single predefined profile used by the admin pages. Creates event types and views upcoming meetings. No sign-in and no password.
+- **Guest**: Anyone browsing the public calendar. Views event types, picks a type, and books a free slot. No account, no login, no registration.
 
 ## User Identity
-- Do not ask for a name on a start page, and do not remember a name per tab. That would be login. Guests browse and book without signing in.
-- The owner is a single predefined profile used by the admin pages. There is no sign-in and no password.
-- Do ask for the guest's name when they confirm a slot. That booking name is stored on that booking only so the owner's upcoming-meetings list can show who is coming. It is not an account, it does not log the guest in, and using the same name later does not restore a session.
+
+- Do not ask for a name on a start page, and do not remember a name per tab.
+- Ask for the guest's name only when they confirm a slot. That name is stored on that booking only so the owner can see who is coming. It is not an account and is not remembered.
 
 ## Event Types
-- The unit a guest picks before booking is an **event type**, not an owner calendar and not a directory of owners. There is a single public calendar.
-- An event type has an id, a title, a description, and a duration in minutes. A booking stores the chosen event type (`eventTypeId` / `eventTypeTitle`) together with the slot and the guest name. Time and guest name alone are not enough.
-- The public catalog lists event types. It must not list owner calendars, owner ids, or a calendar directory.
-- The calendar has two default event types: `15m call` (15 minutes) and `30m call` (30 minutes).
-- The calendar owner can create additional custom event types and set each type's id, title, description, and duration in minutes.
-- The owner's upcoming-meetings list shows bookings of every event type together in one list, including the event type title and the guest name.
-- Occupancy is by clock time, not by event type: two bookings cannot overlap, even when they are different event types. A booking of `30m call` at 10:00–10:30 occupies that interval for `15m call` as well.
 
-## Slot generation
-- The owner does not set, edit, or remove available slots. The backend generates them.
-- Available slots are formed for **14 UTC calendar days** starting from the current UTC date: today through today+13. The window is 14 calendar days, not 28 days and not 14×24 hours from the current instant. A slot on today+14 (the 15th calendar day) is outside the window and must be rejected.
-- For the selected event type, each of those days is filled with consecutive slots of that type's duration in minutes, starting at `00:00` UTC. A slot must start and end on the same UTC date.
-- A slot whose start has already passed is not offered.
-- A guest can book only a free generated slot from that window.
-- A booking occupies its clock interval for every event type: any generated slot that overlaps a booking is not free.
-- Cancelling a booking frees that interval. The slot is offered again because the grid is regenerated, not because stored availability was restored.
+- The unit a guest picks before booking is an **event type**, not an owner calendar. There is a single public calendar.
+- An event type has: id, title, description, and duration in minutes.
+- A booking stores `eventTypeId`, `eventTypeTitle`, the slot times, and `guestName`. Time and guest name alone are not enough.
+- The public catalog lists event types. It must not list owner calendars or a calendar directory.
+- Default event types: `15m call` (15 min) and `30m call` (30 min).
+- The owner can create additional event types and delete them if no upcoming bookings reference that type.
 
-## Core Features
-- There is a single public calendar with a predefined owner.
-- Guests open the public calendar, view its event types, choose a type, and book a free slot of that type inside the 14-day window.
-- The owner views a list of upcoming booked meetings across all event types.
-- Prevent double-booking of the same time, including across different event types.
-- Cancelling a booking returns that interval to the generated free-slot list.
-- No notifications — users refresh the page to see changes.
+## Slot Generation and the 14-Day Window
 
-## Calendar Owner Capabilities
-- The owner is a single predefined profile with no sign-in required.
-- Create custom event types (id, title, description, duration in minutes) in addition to the default `15m call` and `30m call`.
-- Delete custom event types, but only if no upcoming bookings reference that type. Default event types cannot be deleted while they have future bookings.
-- View a page of upcoming meetings that lists bookings of every event type in one list, showing the guest name given at booking time and the event type.
-- Share a public link to the calendar for guests to view.
+- The backend generates available slots. The owner does not publish, edit, or remove availability.
+- **Window**: 14 UTC calendar days from the current UTC date: today through today+13. A slot on today+14 (the 15th calendar day) is outside the window.
+- For the selected event type, each day is filled with consecutive slots of that type's duration starting at `00:00` UTC. A slot must start and end on the same UTC date.
+- Slots whose start has already passed are not offered.
+
+## Occupancy
+
+- Occupancy is by clock time, not by event type: two bookings cannot overlap, even when they are different event types.
+- Example: a booking of `30m call` at 10:00–10:30 occupies that interval for `15m call` as well.
+- Cancelling a booking frees that interval. The slot reappears because the grid is regenerated, not because stored availability is restored.
+
+## Owner Capabilities
+
+- Create and delete event types.
+- View upcoming meetings across all event types in one list, showing event type title and guest name.
 - Cancel booked meetings.
+- Share the public link to the calendar.
 
 ## Guest Capabilities
-- Open the public calendar with no account and no login.
-- View a page of event types showing title, description, and duration.
-- Select an event type, open the calendar, and pick a free slot in the next 14 days.
-- Confirm a booking on the selected slot by entering a guest name. The booking stores the chosen event type and that name. That guest name is not a login and is not remembered.
+
+- Open the public calendar with no account.
+- View event types (title, description, duration).
+- Select a type, pick a free slot in the 14-day window, and confirm by entering a guest name.
 
 ## Constraints & Scope
-- No registration, no passwords, and no authentication.
-- No personal account dashboards, no guest sessions, and no start-page name remembered per tab.
-- No integration with external calendar services.
-- No persistent storage of event types or bookings (in-memory storage only). Slots are not stored; they are generated on each request.
-- The calendar is publicly accessible by URL.
-- Single timezone support: UTC only.
+
+- No persistent storage; in-memory only. Slots are generated on each request.
+- Single timezone: UTC only.
 - No email or in-app notifications.
-- No owner-published availability and no recurring availability schedules.
-- Maximum booking horizon: 14 UTC calendar days from the current UTC date (today through today+13). The same limit applies to the API, slot generation, seed validation, and tests.
-- Server restart clears event types and bookings; nothing survives a restart except the declared seed data, which is loaded again on every start.
-- Seeded demo data recreates the predefined owner profile, the default event types (`15m call`, `30m call`), and any declared demo bookings.
+- Server restart reloads seed data; nothing else survives.
