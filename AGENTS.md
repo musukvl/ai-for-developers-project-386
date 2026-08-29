@@ -22,3 +22,14 @@ Keep README.md up to date.
 
 - Place reports in the `__reports` directory
 - Place temporary scripts in the `__scripts` directory
+
+## Working progress
+
+- After a task is complete and tests pass, commit. That commit is the restore point.
+- If a problem is still unfixed after three attempts, discard the failed work, restore the last restore-point commit, and rewrite the solution from there instead of stacking more patches.
+
+## Code generation
+
+- Follow PEP best practices
+- Follow the python skill
+- Add logging to reveal the application flow
