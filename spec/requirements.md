@@ -15,15 +15,17 @@ There is no registration and no authentication. There are no passwords.
 - Do ask for the guest's name when they confirm a slot. That booking name is stored on that booking only so the owner's upcoming-meetings list can show who is coming. It is not an account, it does not log the guest in, and using the same name later does not restore a session.
 
 ## Event Types
-- The calendar has event types that a guest picks before booking. An event type has an id, a title, a description, and a duration in minutes.
+- The unit a guest picks before booking is an **event type**, not an owner calendar and not a directory of owners. There is a single public calendar.
+- An event type has an id, a title, a description, and a duration in minutes. A booking stores the chosen event type (`eventTypeId` / `eventTypeTitle`) together with the slot and the guest name. Time and guest name alone are not enough.
+- The public catalog lists event types. It must not list owner calendars, owner ids, or a calendar directory.
 - The calendar has two default event types: `15m call` (15 minutes) and `30m call` (30 minutes).
 - The calendar owner can create additional custom event types and set each type's id, title, description, and duration in minutes.
-- The owner's upcoming-meetings list shows bookings of every event type together in one list.
-- Occupancy is by clock time, not by event type: two bookings cannot overlap, even when they are different event types.
+- The owner's upcoming-meetings list shows bookings of every event type together in one list, including the event type title and the guest name.
+- Occupancy is by clock time, not by event type: two bookings cannot overlap, even when they are different event types. A booking of `30m call` at 10:00–10:30 occupies that interval for `15m call` as well.
 
 ## Slot generation
 - The owner does not set, edit, or remove available slots. The backend generates them.
-- Available slots are formed for 14 UTC calendar days starting from the current UTC date: today through today+13.
+- Available slots are formed for **14 UTC calendar days** starting from the current UTC date: today through today+13. The window is 14 calendar days, not 28 days and not 14×24 hours from the current instant. A slot on today+14 (the 15th calendar day) is outside the window and must be rejected.
 - For the selected event type, each of those days is filled with consecutive slots of that type's duration in minutes, starting at `00:00` UTC. A slot must start and end on the same UTC date.
 - A slot whose start has already passed is not offered.
 - A guest can book only a free generated slot from that window.
@@ -61,6 +63,6 @@ There is no registration and no authentication. There are no passwords.
 - Single timezone support: UTC only.
 - No email or in-app notifications.
 - No owner-published availability and no recurring availability schedules.
-- Maximum booking horizon: 14 days from the current date.
+- Maximum booking horizon: 14 UTC calendar days from the current UTC date (today through today+13). The same limit applies to the API, slot generation, seed validation, and tests.
 - Server restart clears event types and bookings; nothing survives a restart except the declared seed data, which is loaded again on every start.
 - Seeded demo data recreates the predefined owner profile, the default event types (`15m call`, `30m call`), and any declared demo bookings.

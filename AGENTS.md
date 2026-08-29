@@ -33,3 +33,17 @@ Keep README.md up to date.
 - Follow PEP best practices
 - Follow the python skill
 - Add logging to reveal the application flow
+
+## Commits
+
+Use Conventional Commits so release-please can version and changelog automatically:
+
+- `feat:` user-facing feature
+- `fix:` bug fix
+- `docs:` documentation only
+- `ci:` CI / release-please / workflows
+- `test:` tests only
+- `chore:` tooling, dependencies, lockfiles
+- `refactor:` behavior-preserving code change
+
+Do not write unscoped freeform subjects such as "Adjustments before submit".

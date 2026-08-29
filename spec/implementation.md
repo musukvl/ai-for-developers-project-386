@@ -4,6 +4,7 @@
 
 - The application is a Single Page Application (SPA) with a backend API.
 - The HTTP API contract in `spec/api.tsp` is the source of truth. The frontend and backend implement against that contract, not against each other. `spec/api.md` stays in sync with the TypeSpec.
+- TypeSpec is compiled to OpenAPI. `spec/` has a TypeSpec manifest (`package.json` / `tspconfig.yaml`), a generate command, and a committed generated spec. CI fails when the generated OpenAPI is out of date.
 - The backend and frontend should be packed together as a single Docker image for deployment.
 - Zero deployment required for the project it should be possbile to build it with the single Dockerfile from soruces from scratch
 - Don't mix roles in code: owner logic and guest logic should be splitted to different components/modules.
@@ -35,6 +36,9 @@ frontend/
 spec/
   api.tsp               TypeSpec API contract (source of truth)
   api.md                prose companion to the TypeSpec
+  tspconfig.yaml        TypeSpec emit config
+  package.json          TypeSpec compiler dependencies and generate script
+  openapi.yaml          generated OpenAPI 3 spec (committed; do not edit by hand)
 ```
 
 Owner and guest code never import each other. Anything they share lives in the shell or in a neutral module such as the API client.
@@ -42,7 +46,7 @@ Owner and guest code never import each other. Anything they share lives in the s
 ## Runtime and configuration
 
 - The backend runs as a single process. In-memory storage cannot be shared across processes, so a multi-worker server would silently split state; this is a hard constraint, not a preference.
-- Dev and Docker both use the Flask built-in server with threading enabled. The storage layer guards every mutation with one process-wide `threading.RLock`, which is what makes the booking check-and-reserve atomic.
+- Development uses the Flask built-in server with threading enabled. Docker/production uses Waitress (single process, threaded). Waitress is required so the container exits on `SIGTERM` within 10 seconds instead of being killed with 137. The storage layer guards every mutation with one process-wide `threading.RLock`, which is what makes the booking check-and-reserve atomic.
 - Ports: Flask on `5000`, Vite dev server on `5173`, and the Docker image exposes `5000`. Vite proxies `/api` to `http://localhost:5000`. The process listens on `PORT` when that variable is set (default `5000`).
 - Environment variables, all optional with the defaults shown:
 
@@ -56,6 +60,8 @@ Owner and guest code never import each other. Anything they share lives in the s
 
 - In the packaged build Flask serves the built SPA: `/api/*` is handled by the API and an unknown `/api/*` path returns a JSON `404 not_found`, static assets are served from `STATIC_DIR`, and every other path returns `index.html` so deep links such as `/owner` and `/book/thirty-minute-call` survive a refresh.
 - Startup fails loudly on an unreadable or invalid seed file rather than booting with partial data.
+- Flask `MAX_CONTENT_LENGTH` is 64 KiB. Oversized bodies return HTTP 413 and must not be fully parsed as a normal JSON validation error. After a 413, the next well-formed request on the same app succeeds.
+- The Node build stage in the Dockerfile pins `linux/amd64` so `npm run build` does not depend on Rolldown's linux/arm64 native binding. Document that pin in the README. The Python runtime stage stays on the host architecture; the SPA assets are architecture-independent.
 
 ## Dev envionment requirements
 - It should be possible to run SPA and backend in developer machine without Docker
@@ -75,9 +81,9 @@ Owner and guest code never import each other. Anything they share lives in the s
 
 ### Slot generation
 - The backend generates available slots. There is no API to publish, edit, or remove availability.
-- For a selected event type, generate consecutive slots of `durationMinutes` from `00:00` UTC to the last slot that still ends on that UTC date, for each UTC calendar day from today through today+13.
+- `WINDOW_DAYS` is 14. For a selected event type, generate consecutive slots of `durationMinutes` from `00:00` UTC to the last slot that still ends on that UTC date, for each UTC calendar day from today through today+13. Day 14 (`today+14`) and later, including day 15 and day 27, are outside the window.
 - Omit any slot whose start has already passed.
-- A booking occupies its clock interval for every event type. Creating a booking that overlaps an existing booking is `409 conflict`.
+- A booking occupies its clock interval for every event type. Creating a booking that overlaps an existing booking is `409 slot_occupied`, including when the two bookings use different event types.
 
 ### Storage
 - For storage use in-memory storage (e.g., Python dictionaries) to hold event types and bookings. Slots are not stored; they are generated on each request. No persistent database is required.
@@ -151,11 +157,14 @@ Example line, pretty-printed here but written on one line:
 - Create integration tests and e2e tests as main usecases.
 - Create yaml files to populate in-memory storage for each e2e/intregration test. Each test starts the app with `SEED_FILE` pointing at its own fixture; there is no test-only API for resetting state.
 - Create unit tests to cover calculation logic, but not dataflow. Dataflow should be covered by e2e/integration tests.
-- Unit tests cover slot generation from event-type duration, the 14-day window, occupancy overlap, and seed expansion of relative days. They import functions directly and never start the app.
-- Integration tests use the Flask test client from the app factory, with each test constructing an app whose `SEED_FILE` points at its own fixture. Nothing is shared between tests, so no reset endpoint is needed.
+- Unit tests cover slot generation from event-type duration, the 14-day window (including rejection of day 14+), occupancy overlap across different event types, and seed expansion of relative days. They import functions directly and never start the app.
+- Integration tests use the Flask test client from the app factory, with each test constructing an app whose `SEED_FILE` points at its own fixture. Nothing is shared between tests, so no reset endpoint is needed. They cover: booking by event type, cross-type slot conflict, horizon rejection of day 15 and day 27, 413 on an oversized body followed by a successful next request, and process exit on SIGTERM within 10 seconds.
 - E2E tests run Playwright against the Vite dev server, which proxies to a Flask process started by Playwright's `webServer` config with that spec's `SEED_FILE`. The suite waits on `GET /api/health` before the first test.
+- After a successful booking the happy-path e2e uses a web-first assertion that `role=alert` is not displayed, in addition to showing the booking and hiding the taken slot.
 - Each test run sets `LOG_FILE` to a path under `logs/`, named after the test, so a failure can be diagnosed from a single JSON Lines file.
 - Fixtures use relative day offsets like the default seed, so tests never go stale and never depend on the wall clock beyond "today".
+- GitHub Actions on push and pull request runs: Ruff, pytest, frontend production build, Playwright e2e, TypeSpec compile with a drift check against the committed OpenAPI file. Do not remove `hexlet-check.yml`.
+- Commits follow Conventional Commits (`feat:`, `fix:`, `docs:`, `ci:`, `test:`, `chore:`, `refactor:`). release-please is configured as a GitHub Actions workflow on `main` and opens or updates a release-PR with changelog and version.
 
 ## Frontend
 
@@ -163,7 +172,7 @@ Example line, pretty-printed here but written on one line:
 - For the frontend use Vue 3 with Composition API.
 - Make the SPA firendly for running in VS Code/Cursor in-build browser for UI-testing.
 - Owner pages and guest pages are two different modules. There is no start-page name form.
-- Routing uses `vue-router` with public guest routes and owner admin routes, for example `/` (event-type catalog), `/book/:eventTypeId` (generated slots and confirm with guest name), and `/owner` (create event types and upcoming bookings). No state management library is needed.
+- Routing uses `vue-router` with public guest routes and owner admin routes, for example `/` (event-type catalog), `/book/:eventTypeId` (generated slots and confirm with guest name), and `/owner` (create event types and upcoming bookings). No state management library is needed. The home page lists event types, never a directory of owner calendars. The booking form submits `eventTypeId`, `slotStart`, and `guestName`. The owner's booked-meetings list shows event type title and guest name.
 - Do not persist a guest name in `sessionStorage` or any other tab-scoped store. The name field exists only on the booking confirmation form and is sent in `POST /api/bookings`.
 - The API client is one module that maps error bodies to their error codes (`validation_error`, `not_found`, `conflict`, `slot_occupied`, `slot_outside_window`, `slot_mismatch`, `future_bookings_exist`) so components handle those codes explicitly instead of inspecting status codes. It does not attach an identity header.
 - Use granular error codes to show appropriate user messages:
