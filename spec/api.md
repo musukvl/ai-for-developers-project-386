@@ -26,12 +26,26 @@
 }
 ```
 
-- Error codes are `validation_error` (400), `not_found` (404), and `conflict` (409). There is no `name_mismatch`, `401`, or `403`.
+- Error codes:
+  - `validation_error` (400) — request body or query is missing, malformed, or fails validation rules
+  - `not_found` (404) — the referenced event type or booking does not exist or is in the past
+  - `conflict` (409) — generic conflict (use more specific codes when applicable)
+  - `slot_occupied` (409) — the requested slot is already booked by another booking
+  - `slot_outside_window` (409) — the requested slot is in the past or beyond the 14-day window
+  - `slot_mismatch` (409) — `slotStart` does not align with the event type's duration grid
+  - `future_bookings_exist` (409) — cannot delete event type because upcoming bookings reference it
+
+- There is no `name_mismatch`, `401`, or `403`.
 - Checks run in a fixed order, and the first failure decides the response:
 
   1. The request body or required query parses and satisfies the endpoint's rules, otherwise `400 validation_error`.
   2. The event type or booking named in the request exists and is not in the past, otherwise `404 not_found`.
-  3. The operation is compatible with current state, otherwise `409 conflict`.
+  3. The operation is compatible with current state, otherwise `409` with a specific code:
+     - `slot_occupied` — another booking covers this time
+     - `slot_outside_window` — slot is past or beyond 14 days
+     - `slot_mismatch` — slotStart not on duration grid
+     - `future_bookings_exist` — event type has upcoming bookings
+     - `conflict` — other conflicts (e.g., duplicate event type id)
 
 ## Data Shapes
 
@@ -160,7 +174,14 @@ Response: `201 Created`
 
 `guestName` must be a non-empty string after trimming. It is stored on the booking as given (after trim) so the owner's upcoming list can show who is coming.
 
-The server generates the slot grid for `eventTypeId`, checks occupancy, and reserves the slot atomically. Returns `404 not_found` when the event type does not exist, `400 validation_error` when `slotStart` or `guestName` is missing or unparseable, and `409 conflict` when that clock time is not a free generated slot — whether it was already booked, overlaps another event type's booking, is not on the duration grid, or has already started.
+The server generates the slot grid for `eventTypeId`, checks occupancy, and reserves the slot atomically.
+
+Error responses:
+- `404 not_found` — the event type does not exist
+- `400 validation_error` — `slotStart` or `guestName` is missing or unparseable
+- `409 slot_occupied` — the slot is already booked (by any event type)
+- `409 slot_outside_window` — `slotStart` is in the past or beyond the 14-day window
+- `409 slot_mismatch` — `slotStart` does not fall on the event type's duration grid (e.g., 10:17 for a 30-minute type)
 
 ## Owner API
 
@@ -184,6 +205,18 @@ Request:
 Response: `200 OK` with the created `EventType`.
 
 Returns `400 validation_error` when a field is missing, `durationMinutes` is less than 1, or `id` is empty. Returns `409 conflict` when an event type with that `id` already exists.
+
+### Delete Event Type
+
+`DELETE /api/owner/event-types/{eventTypeId}`
+
+Deletes an event type. The operation fails if any upcoming bookings reference this event type.
+
+Response: `204 No Content`
+
+Error responses:
+- `404 not_found` — the event type does not exist
+- `409 future_bookings_exist` — cannot delete because upcoming bookings reference this event type; cancel those bookings first
 
 ### List Owner Bookings
 

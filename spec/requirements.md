@@ -41,6 +41,7 @@ There is no registration and no authentication. There are no passwords.
 ## Calendar Owner Capabilities
 - The owner is a single predefined profile with no sign-in required.
 - Create custom event types (id, title, description, duration in minutes) in addition to the default `15m call` and `30m call`.
+- Delete custom event types, but only if no upcoming bookings reference that type. Default event types cannot be deleted while they have future bookings.
 - View a page of upcoming meetings that lists bookings of every event type in one list, showing the guest name given at booking time and the event type.
 - Share a public link to the calendar for guests to view.
 - Cancel booked meetings.

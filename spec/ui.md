@@ -48,7 +48,10 @@ The guest booking calendar uses a monthly layout. Slots are system-generated for
 - Use the shared monthly calendar picker for that type's generated slots.
 - Only dates with open generated slots in the 14-day window may be selected.
 - Choosing **Book** on a slot opens a confirmation that requires a guest name. Submitting sends `eventTypeId`, `slotStart`, and `guestName` in `POST /api/bookings`. Do not reuse or remember that name on later visits.
-- If booking returns a conflict because the view is stale, refetch the slots and explain that the selected slot was just taken.
+- Handle booking errors with user-friendly messages based on error code:
+  - `slot_occupied` — "This slot was just taken. Please choose another time." Then refetch slots.
+  - `slot_outside_window` — "This time is no longer available. Please select a different slot."
+  - `slot_mismatch` — "Invalid time selected. Please choose from the available slots."
 - After a successful booking, show confirmation with the time, event type, and the name just entered.
 - If `{eventTypeId}` is unknown, show a not-found state with a link back to `/`.
 
@@ -56,6 +59,10 @@ The guest booking calendar uses a monthly layout. Slots are system-generated for
 
 - No sign-in. This page is the admin part and uses the predefined owner profile by default.
 - Provide a form to create an event type: id, title, description, and duration in minutes, in addition to the default `15m call` and `30m call`.
+- Show an **Event types** section listing all event types. Each item displays title, description, duration, and a **Delete** action.
+  - Deleting an event type prompts for confirmation.
+  - If deletion fails with `future_bookings_exist`, show a message: "Cannot delete — cancel all upcoming bookings for this event type first."
+  - After successful deletion, refresh the event types list.
 - Show a **Booked meetings** section listing upcoming bookings of every event type in one list. Each item displays:
   - `YYYY.MM.DD HH:mm`
   - event type title

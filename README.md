@@ -3,9 +3,9 @@
 
 # Calls Calendar
 
-A small scheduling app: an owner publishes 30-minute availability slots on their
-calendar, and visitors book a slot with a name and no account. See [spec/](spec/)
-for the full requirements, API contract, and UI notes.
+A small scheduling app: a predefined owner creates event types with custom durations,
+and guests book auto-generated slots by entering their name at booking time — no
+account required. See [spec/](spec/) for the full requirements, API contract, and UI notes.
 
 Live app: https://ai-for-developers-project-386-wwcr.onrender.com/
 
@@ -22,9 +22,9 @@ backend/                Flask API, domain logic, in-memory storage, seed loader
   tests/unit/           calculation logic only
   tests/integration/    Flask test client, one seed fixture per test
 frontend/               Vue 3 + TS + Tailwind SPA
-  src/shell/            name entry, routing, the X-User-Name header
-  src/owner/            owner module (create calendar, publish slots, cancel bookings)
-  src/visitor/          visitor module (book/cancel a slot)
+  src/shell/            routing only; no name entry, no auth
+  src/owner/            owner module (create/delete event types, view/cancel bookings)
+  src/guest/            guest module (view event types, book a slot with name)
   tests/e2e/            Playwright specs, one seed fixture per spec
 spec/                   requirements, API contract, and UI notes
 ```

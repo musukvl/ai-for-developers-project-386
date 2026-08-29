@@ -125,7 +125,7 @@ bookings:
 - Use logging to track API requests and errors for trace and debugging purposes. 
 - Log output should be easy to analyze by agent
 - The format is JSON Lines: one flat JSON object per line, written to stdout and to `LOG_FILE`. Flat rather than loguru's default nested envelope, so a single `jq` selector reaches any field and `grep` on a line yields a complete record. Configure loguru with a custom serializer plus `logger.patch`, not `serialize=True`.
-- Every record carries `ts` (UTC ISO 8601), `level`, `event`, and `request_id`. `event` is a dotted name from a closed set, which is what makes the log queryable: `request.end`, `event_type.created`, `booking.created`, `booking.cancelled`, `seed.loaded`, and `error`.
+- Every record carries `ts` (UTC ISO 8601), `level`, `event`, and `request_id`. `event` is a dotted name from a closed set, which is what makes the log queryable: `request.end`, `event_type.created`, `event_type.deleted`, `booking.created`, `booking.cancelled`, `seed.loaded`, and `error`.
 - `request_id` is generated per request and attached with `logger.contextualize`, so every line emitted while handling a request can be correlated without threading a logger through call sites.
 - `request.end` is emitted once per request with `method`, `path`, `status`, and `duration_ms`. Domain events add their own fields, such as `event_type_id`, `slot_start`, `booking_id`, and `guest_name`.
 - Every error response also emits an `error` record with `error_code` and `message`, so a failing test can be explained from the log alone.
@@ -165,8 +165,12 @@ Example line, pretty-printed here but written on one line:
 - Owner pages and guest pages are two different modules. There is no start-page name form.
 - Routing uses `vue-router` with public guest routes and owner admin routes, for example `/` (event-type catalog), `/book/:eventTypeId` (generated slots and confirm with guest name), and `/owner` (create event types and upcoming bookings). No state management library is needed.
 - Do not persist a guest name in `sessionStorage` or any other tab-scoped store. The name field exists only on the booking confirmation form and is sent in `POST /api/bookings`.
-- The API client is one module that maps error bodies to `validation_error`, `not_found`, and `conflict` so components handle those codes explicitly instead of inspecting status codes. It does not attach an identity header.
-- Since there are no notifications, a `409 conflict` on booking means the view is stale: refetch the generated slots and tell the guest the slot was just taken.
+- The API client is one module that maps error bodies to their error codes (`validation_error`, `not_found`, `conflict`, `slot_occupied`, `slot_outside_window`, `slot_mismatch`, `future_bookings_exist`) so components handle those codes explicitly instead of inspecting status codes. It does not attach an identity header.
+- Use granular error codes to show appropriate user messages:
+  - `slot_occupied` — refetch slots and tell the guest the slot was just taken
+  - `slot_outside_window` — tell the guest the time is no longer available
+  - `slot_mismatch` — tell the guest to choose from the available slots
+  - `future_bookings_exist` — tell the owner to cancel bookings before deleting the event type
 - Use playwright for frontend tests.
 
 ### CSS Framework

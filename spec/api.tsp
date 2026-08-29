@@ -11,6 +11,10 @@ enum ErrorCode {
   validation_error: "validation_error",
   not_found: "not_found",
   conflict: "conflict",
+  slot_occupied: "slot_occupied",
+  slot_outside_window: "slot_outside_window",
+  slot_mismatch: "slot_mismatch",
+  future_bookings_exist: "future_bookings_exist",
 }
 
 model ErrorDetail {
@@ -129,6 +133,13 @@ op listEventTypes(): EventTypeList;
 op createEventType(
   @body body: CreateEventTypeRequest,
 ): EventType | BadRequest | Conflict;
+
+/** Owner deletes an event type. Fails with future_bookings_exist if upcoming bookings reference this type. */
+@delete
+@route("/owner/event-types/{eventTypeId}")
+op deleteEventType(
+  @path eventTypeId: string,
+): NoContent | NotFound | Conflict;
 
 /** Generated free slots for the selected event type in the 14-day window. */
 @get
