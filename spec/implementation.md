@@ -98,6 +98,26 @@ bookings:
     day: +1
     start: "10:30"
     guestName: Sam
+  - id: seed-booking-2
+    eventTypeId: fifteen-minute-call
+    day: +1
+    start: "14:00"
+    guestName: Alex
+  - id: seed-booking-3
+    eventTypeId: thirty-minute-call
+    day: +2
+    start: "09:00"
+    guestName: Jordan
+  - id: seed-booking-4
+    eventTypeId: fifteen-minute-call
+    day: +4
+    start: "16:15"
+    guestName: Riley
+  - id: seed-booking-5
+    eventTypeId: thirty-minute-call
+    day: +7
+    start: "11:00"
+    guestName: Casey
 ```
 
 - `day` is an integer offset from today; `start` is `HH:MM` UTC.

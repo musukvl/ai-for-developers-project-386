@@ -16,3 +16,13 @@ bookings:
     day: +1
     start: "10:30"
     guestName: Sam
+  - id: seed-booking-2
+    eventTypeId: fifteen-minute-call
+    day: +2
+    start: "14:00"
+    guestName: Alex
+  - id: seed-booking-3
+    eventTypeId: thirty-minute-call
+    day: +4
+    start: "09:00"
+    guestName: Jordan

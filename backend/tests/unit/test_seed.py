@@ -141,5 +141,19 @@ bookings:
         )
         assert ids["thirty-minute-call"].duration_minutes == 30
         upcoming = storage.list_upcoming_bookings(NOW)
-        assert upcoming[0].id == "seed-booking-1"
+        assert [booking.id for booking in upcoming] == [
+            "seed-booking-1",
+            "seed-booking-2",
+            "seed-booking-3",
+            "seed-booking-4",
+            "seed-booking-5",
+        ]
         assert upcoming[0].start == datetime(2026, 8, 2, 10, 30, tzinfo=UTC)
+        assert {booking.guest_name for booking in upcoming} == {
+            "Sam",
+            "Alex",
+            "Jordan",
+            "Riley",
+            "Casey",
+        }
+        assert len({booking.start.date() for booking in upcoming}) == 4

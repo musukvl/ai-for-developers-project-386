@@ -19,6 +19,8 @@ const emit = defineEmits<{
   (event: "cancel", bookingId: string): void;
 }>();
 
+const TILE_MEETING_LIMIT = 3;
+
 const today = todayDateKey();
 const selectedDate = ref<string | null>(null);
 const viewYear = ref(new Date().getUTCFullYear());
@@ -128,14 +130,30 @@ function dayButtonClass(day: CalendarDay): string {
   return "text-slate-400";
 }
 
+function bookingsOnDay(day: CalendarDay): Booking[] {
+  return bookingsByDate.value.get(day.dateKey) ?? [];
+}
+
+function tileLines(day: CalendarDay): string[] {
+  const meetings = bookingsOnDay(day);
+  const shown = meetings.slice(0, TILE_MEETING_LIMIT);
+  const lines = shown.map((booking) => `${formatTime(booking.start)} ${booking.guestName}`);
+  const remaining = meetings.length - shown.length;
+  if (remaining > 0) {
+    lines.push(`+${remaining} more`);
+  }
+  return lines;
+}
+
 function dayAriaLabel(day: CalendarDay): string {
-  if (day.slotCount === 1) {
-    return `${day.dateKey}, 1 booked meeting`;
+  const meetings = bookingsOnDay(day);
+  if (meetings.length === 0) {
+    return day.dateKey;
   }
-  if (day.slotCount > 1) {
-    return `${day.dateKey}, ${day.slotCount} booked meetings`;
-  }
-  return day.dateKey;
+  const countLabel =
+    meetings.length === 1 ? "1 booked meeting" : `${meetings.length} booked meetings`;
+  const summaries = meetings.map((booking) => `${formatTime(booking.start)} ${booking.guestName}`).join(", ");
+  return `${day.dateKey}, ${countLabel}: ${summaries}`;
 }
 
 function cancelLabel(booking: Booking): string {
@@ -177,13 +195,21 @@ function cancelLabel(booking: Booking): string {
           :aria-label="dayAriaLabel(day)"
           :aria-pressed="selectedDate === day.dateKey"
           :class="[
-            'flex min-h-14 flex-col items-center justify-center rounded-md text-sm disabled:cursor-not-allowed',
+            'flex min-h-24 flex-col items-stretch rounded-md p-1 text-sm disabled:cursor-not-allowed',
             dayButtonClass(day),
           ]"
           @click="selectDay(day)"
         >
-          <span>{{ day.dayNumber }}</span>
-          <span v-if="day.slotCount > 0" class="text-[11px] leading-none">{{ day.slotCount }}</span>
+          <span class="text-center text-xs font-semibold">{{ day.dayNumber }}</span>
+          <ul v-if="tileLines(day).length > 0" class="mt-0.5 space-y-0.5">
+            <li
+              v-for="line in tileLines(day)"
+              :key="line"
+              class="truncate text-left text-[10px] leading-tight opacity-90"
+            >
+              {{ line }}
+            </li>
+          </ul>
         </button>
       </div>
     </section>
