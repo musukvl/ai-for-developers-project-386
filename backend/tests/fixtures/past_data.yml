@@ -1,0 +1,19 @@
+owner: demo-owner
+
+eventTypes:
+  - id: thirty-minute-call
+    title: 30m call
+    description: A standard call.
+    durationMinutes: 30
+
+bookings:
+  - id: past-booking-1
+    eventTypeId: thirty-minute-call
+    day: -1
+    start: "10:00"
+    guestName: Past Guest
+  - id: upcoming-booking-1
+    eventTypeId: thirty-minute-call
+    day: +1
+    start: "11:00"
+    guestName: Sam

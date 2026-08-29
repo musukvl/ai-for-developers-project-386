@@ -1,0 +1,16 @@
+{
+  "name": "calls-calendar-spec",
+  "private": true,
+  "type": "module",
+  "tspMain": "api.tsp",
+  "scripts": {
+    "compile": "tsp compile .",
+    "compile:check": "tsp compile . && git diff --exit-code -- openapi.yaml"
+  },
+  "devDependencies": {
+    "@typespec/compiler": "^1.11.0",
+    "@typespec/http": "^1.11.0",
+    "@typespec/openapi": "^1.11.0",
+    "@typespec/openapi3": "^1.11.0"
+  }
+}

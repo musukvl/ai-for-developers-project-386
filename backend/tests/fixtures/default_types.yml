@@ -1,0 +1,13 @@
+owner: demo-owner
+
+eventTypes:
+  - id: fifteen-minute-call
+    title: 15m call
+    description: A short call.
+    durationMinutes: 15
+  - id: thirty-minute-call
+    title: 30m call
+    description: A standard call.
+    durationMinutes: 30
+
+bookings: []

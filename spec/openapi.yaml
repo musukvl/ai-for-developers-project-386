@@ -1,0 +1,383 @@
+openapi: 3.0.0
+info:
+  title: Calls Calendar API
+  version: 0.0.0
+tags: []
+paths:
+  /api/bookings:
+    post:
+      operationId: createBooking
+      description: Guest books a generated slot. guestName is collected at confirm time, not from a session.
+      parameters: []
+      responses:
+        '201':
+          description: The request has succeeded and a new resource has been created as a result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateBookingResponse'
+        '400':
+          description: The server could not understand the request due to invalid syntax.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        '404':
+          description: The server cannot find the requested resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        '409':
+          description: The request conflicts with the current state of the server.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBookingRequest'
+  /api/event-types:
+    get:
+      operationId: listEventTypes
+      description: Lists event types for the public catalog. No login.
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventTypeList'
+  /api/health:
+    get:
+      operationId: health
+      description: Readiness probe for the API and Docker image.
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+  /api/owner/bookings:
+    get:
+      operationId: listOwnerBookings
+      description: 'Owner upcoming meetings: all event types in one list.'
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingList'
+  /api/owner/bookings/{bookingId}:
+    delete:
+      operationId: cancelBookingAsOwner
+      description: Owner cancels a booking. The interval becomes a free generated slot again.
+      parameters:
+        - name: bookingId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+        '404':
+          description: The server cannot find the requested resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+  /api/owner/event-types:
+    post:
+      operationId: createEventType
+      description: Owner creates an event type. Admin uses the predefined owner profile; no sign-in header.
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventType'
+        '400':
+          description: The server could not understand the request due to invalid syntax.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        '409':
+          description: The request conflicts with the current state of the server.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEventTypeRequest'
+  /api/owner/event-types/{eventTypeId}:
+    delete:
+      operationId: deleteEventType
+      description: Owner deletes an event type. Fails with future_bookings_exist if upcoming bookings reference this type.
+      parameters:
+        - name: eventTypeId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+        '404':
+          description: The server cannot find the requested resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+        '409':
+          description: The request conflicts with the current state of the server.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conflict'
+  /api/slots:
+    get:
+      operationId: listSlots
+      description: Generated free slots for the selected event type in the 14-day window.
+      parameters:
+        - name: eventTypeId
+          in: query
+          required: true
+          schema:
+            type: string
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SlotList'
+        '400':
+          description: The server could not understand the request due to invalid syntax.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        '404':
+          description: The server cannot find the requested resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+components:
+  schemas:
+    BadRequest:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/ErrorResponse'
+    Booking:
+      type: object
+      required:
+        - id
+        - eventTypeId
+        - eventTypeTitle
+        - start
+        - end
+        - guestName
+      properties:
+        id:
+          type: string
+          description: Opaque server-generated booking identifier.
+        eventTypeId:
+          type: string
+        eventTypeTitle:
+          type: string
+        start:
+          type: string
+          format: date-time
+        end:
+          type: string
+          format: date-time
+        guestName:
+          type: string
+          description: Name the guest typed when confirming this slot. Not an account.
+    BookingList:
+      type: object
+      required:
+        - bookings
+      properties:
+        bookings:
+          type: array
+          items:
+            $ref: '#/components/schemas/Booking'
+    Conflict:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/ErrorResponse'
+    CreateBookingRequest:
+      type: object
+      required:
+        - eventTypeId
+        - slotStart
+        - guestName
+      properties:
+        eventTypeId:
+          type: string
+        slotStart:
+          type: string
+          format: date-time
+        guestName:
+          type: string
+    CreateBookingResponse:
+      type: object
+      required:
+        - id
+        - eventTypeId
+        - eventTypeTitle
+        - start
+        - end
+        - guestName
+      properties:
+        id:
+          type: string
+        eventTypeId:
+          type: string
+        eventTypeTitle:
+          type: string
+        start:
+          type: string
+          format: date-time
+        end:
+          type: string
+          format: date-time
+        guestName:
+          type: string
+      allOf:
+        - $ref: '#/components/schemas/Created'
+    CreateEventTypeRequest:
+      type: object
+      required:
+        - id
+        - title
+        - description
+        - durationMinutes
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        durationMinutes:
+          type: integer
+          format: int32
+    Created:
+      type: object
+    ErrorCode:
+      type: string
+      enum:
+        - validation_error
+        - not_found
+        - conflict
+        - slot_occupied
+        - slot_outside_window
+        - slot_mismatch
+        - future_bookings_exist
+    ErrorDetail:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          $ref: '#/components/schemas/ErrorCode'
+        message:
+          type: string
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          $ref: '#/components/schemas/ErrorDetail'
+    EventType:
+      type: object
+      required:
+        - id
+        - title
+        - description
+        - durationMinutes
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        durationMinutes:
+          type: integer
+          format: int32
+      description: |-
+        Event type the guest picks before booking.
+        Default types are `fifteen-minute-call` (15m call) and `thirty-minute-call` (30m call).
+    EventTypeList:
+      type: object
+      required:
+        - eventTypes
+      properties:
+        eventTypes:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventType'
+    HealthResponse:
+      type: object
+      required:
+        - status
+        - seedFile
+      properties:
+        status:
+          type: string
+          enum:
+            - ok
+        seedFile:
+          type: string
+    NotFound:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/ErrorResponse'
+    Slot:
+      type: object
+      required:
+        - start
+        - end
+      properties:
+        start:
+          type: string
+          format: date-time
+        end:
+          type: string
+          format: date-time
+    SlotList:
+      type: object
+      required:
+        - eventTypeId
+        - availableSlots
+      properties:
+        eventTypeId:
+          type: string
+        availableSlots:
+          type: array
+          items:
+            $ref: '#/components/schemas/Slot'
+      description: Generated free slots for one event type over the 14-day window.
