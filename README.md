@@ -9,7 +9,7 @@ account required. See [spec/](spec/) for the full requirements, API contract, an
 
 Live app: https://ai-for-developers-project-386-wwcr.onrender.com/
 
-- **Backend**: Python + Flask, in-memory storage, seeded from YAML on startup.
+- **Backend**: Python 3.14 + Flask, in-memory storage, seeded from YAML on startup.
 - **Frontend**: Vue 3 (Composition API) + TypeScript + Tailwind CSS v4, built with Vite.
 - **Tests**: `pytest` (unit + integration) for the backend, Playwright for end-to-end.
 
@@ -31,7 +31,7 @@ spec/                   requirements, API contract, and UI notes
 
 ## Prerequisites
 
-- [uv](https://docs.astral.sh/uv/) (Python package/dependency manager)
+- [uv](https://docs.astral.sh/uv/) (Python 3.14 package/dependency manager)
 - Node.js 22+ and npm
 - Docker (only needed for the containerized build)
 
@@ -92,7 +92,9 @@ npm run test:e2e
 
 The single [Dockerfile](Dockerfile) builds the SPA with Node, then packages it
 together with the Flask backend into one image that serves both the API and
-the static frontend on port 5000 — no separate deployment steps.
+the static frontend on port 5000 — no separate deployment steps. The Node build
+stage is pinned to `linux/amd64` because Rolldown's native binding is published
+for that architecture.
 
 Build and run from the repository root:
 
