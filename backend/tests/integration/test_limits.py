@@ -12,21 +12,34 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
+from tests.integration.helpers import iso, utc_today_at
+
 _BACKEND_ROOT = Path(__file__).resolve().parent.parent.parent
 _FIXTURES_DIR = Path(__file__).resolve().parent.parent / "fixtures"
 
 
 class TestPayloadLimit:
-    def test_oversized_body_returns_413(self, client):
+    def test_oversized_body_returns_413_and_next_request_succeeds(self, client):
+        app_client = client("default_types.yml")
         oversized = "x" * (65 * 1024)
-        response = client("default_types.yml").post(
+        too_large = app_client.post(
             "/api/bookings",
             data=oversized,
             content_type="application/json",
         )
-        assert response.status_code == 413
-        body = response.get_json()
-        assert body["error"]["code"] != "validation_error"
+        assert too_large.status_code == 413
+        assert too_large.get_json()["error"]["code"] != "validation_error"
+
+        ok = app_client.post(
+            "/api/bookings",
+            json={
+                "eventTypeId": "thirty-minute-call",
+                "slotStart": iso(utc_today_at(10, 0, day_offset=1)),
+                "guestName": "Sam",
+            },
+        )
+        assert ok.status_code == 201
+        assert ok.get_json()["guestName"] == "Sam"
 
 
 class TestSigterm:

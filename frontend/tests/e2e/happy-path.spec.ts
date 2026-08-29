@@ -18,7 +18,8 @@ test("guest books a generated 30m slot without an account", async ({ page }) => 
   await page.getByRole("link", { name: /30m call/ }).click();
 
   await expect(page.getByRole("heading", { name: "30m call" })).toBeVisible();
-  await page.getByRole("button", { name: new RegExp(utcTomorrowKey()) }).click();
+  const dayKey = utcTomorrowKey();
+  await page.getByRole("button", { name: new RegExp(dayKey) }).click();
   await page.getByRole("button", { name: /Book 10:00/ }).click();
 
   await page.getByLabel("Your name").fill("Sam");
@@ -28,8 +29,14 @@ test("guest books a generated 30m slot without an account", async ({ page }) => 
   await expect(page.getByText(/Sam/)).toBeVisible();
   await expect(page.getByRole("alert")).toHaveCount(0);
 
+  await page.getByRole("link", { name: "Book another call" }).click();
+  await page.getByRole("link", { name: /30m call/ }).click();
+  await page.getByRole("button", { name: new RegExp(dayKey) }).click();
+  await expect(page.getByRole("button", { name: /Book 10:00/ })).toHaveCount(0);
+
   await page.goto(`${app.url}/owner`);
-  await expect(page.getByText("30m call · Sam")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Booked meetings" })).toBeVisible();
+  await expect(page.getByText("30m call · Sam").first()).toBeVisible();
 });
 
 function utcTomorrowKey(): string {

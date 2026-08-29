@@ -73,3 +73,29 @@ jobs:
       - name: Run Playwright
         working-directory: frontend
         run: npm run test:e2e
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Build image
+        run: docker build -t calls-calendar .
+      - name: Container exits on SIGTERM within 10 seconds
+        run: |
+          cid="$(docker run -d -p 5000:5000 calls-calendar)"
+          cleanup() { docker rm -f "$cid" >/dev/null 2>&1 || true; }
+          trap cleanup EXIT
+          for _ in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:5000/api/health >/dev/null; then
+              break
+            fi
+            sleep 1
+          done
+          curl -fsS http://127.0.0.1:5000/api/health >/dev/null
+          docker stop -t 10 "$cid"
+          code="$(docker inspect -f '{{.State.ExitCode}}' "$cid")"
+          echo "container exit code: ${code}"
+          if [ "${code}" = "137" ]; then
+            echo "Container was SIGKILL'd after the 10s stop timeout."
+            exit 1
+          fi

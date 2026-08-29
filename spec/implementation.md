@@ -157,6 +157,6 @@ Example:
 
 ## CI
 
-- GitHub Actions on push and pull request: Ruff, pytest, frontend build, Playwright e2e, TypeSpec compile with drift check.
+- GitHub Actions on push and pull request: Ruff, pytest, frontend build, Playwright e2e, TypeSpec compile with drift check, Docker image build and SIGTERM stop.
 - Do not remove `hexlet-check.yml`.
 - Commits follow Conventional Commits. release-please configured on `main`.
